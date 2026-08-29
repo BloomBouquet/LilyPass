@@ -1,14 +1,2 @@
-name: Bootstrap PostgreSQL 18 Evidence (retired)
-
-on:
-  workflow_dispatch:
-
-permissions:
-  contents: read
-
-jobs:
-  retired:
-    if: false
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo retired
+# Temporary PostgreSQL evidence workflow retired after successful runs 33233926266, 33234078751, and 33234142395.
+# The permanent workflow lives in the verified LilyPass source branch and uses a committed frozen pnpm lockfile.
