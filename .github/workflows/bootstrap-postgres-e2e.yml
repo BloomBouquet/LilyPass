@@ -1,0 +1,72 @@
+name: Bootstrap PostgreSQL 18 Evidence
+
+on:
+  issues:
+    types: [opened]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  postgres-integration:
+    if: github.event_name == 'workflow_dispatch' || github.event.issue.title == '[CI] PostgreSQL 18 bootstrap evidence'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: lilypass
+          POSTGRES_PASSWORD: lilypass
+          POSTGRES_DB: lilypass_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U lilypass -d lilypass_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://lilypass:lilypass@127.0.0.1:5432/lilypass_test
+
+    steps:
+      - name: Checkout verified bootstrap snapshot branch
+        uses: actions/checkout@v4
+        with:
+          ref: ci/bootstrap-postgres-e2e
+
+      - name: Reconstruct verified LilyPass source snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .ci/source.part* > /tmp/lilypass-source.b64
+          base64 -d /tmp/lilypass-source.b64 > /tmp/lilypass-source.tar.xz
+          echo "3db4b9ba153111c2821ddcd9ae4ae396789b88dc17afa5b2ce410480ff8ec19e  /tmp/lilypass-source.tar.xz" | sha256sum -c -
+          mkdir source
+          tar -xJf /tmp/lilypass-source.tar.xz -C source
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.21.0
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.11.0'
+
+      - name: Install dependencies
+        working-directory: source
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Verify PostgreSQL CI contract
+        working-directory: source
+        run: node --test tools/postgres-integration-ci.contract.test.mjs
+
+      - name: Run live PostgreSQL integration
+        working-directory: source
+        run: node --experimental-strip-types --test tools/postgres-live-integration.test.ts
