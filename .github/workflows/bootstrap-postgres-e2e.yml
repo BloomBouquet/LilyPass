@@ -1,19 +1,14 @@
-name: Bootstrap PostgreSQL 18 Evidence
+name: Bootstrap PostgreSQL 18 Evidence (retired)
 
 on:
-  issues:
-    types: [opened]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  postgres-integration:
-    if: github.event_name == 'workflow_dispatch' || github.event.issue.title == '[CI] PostgreSQL 18 bootstrap evidence'
+  retired:
+    if: false
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-
     steps:
-      - name: Evidence workflow retired
-        run: echo "Bootstrap evidence is complete; see successful Actions runs and the permanent source workflow."
+      - run: echo retired
