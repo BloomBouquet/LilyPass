@@ -1,2 +1,1 @@
-# Temporary PostgreSQL evidence workflow retired after successful runs 33233926266, 33234078751, and 33234142395.
-# The permanent workflow lives in the verified LilyPass source branch and uses a committed frozen pnpm lockfile.
+# Evidence workflow retired. No workflow triggers remain in this file.
